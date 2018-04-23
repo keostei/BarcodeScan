@@ -1,0 +1,236 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+		<meta name="HandheldFriendly" content="true"/>
+		<meta name="MobileOptimized" content="320"/>
+		<title>Hello H5+</title>
+		<link href="../css/showLoading.css" rel="stylesheet" />
+    	<!--<link href="../css/mui.min.css" rel="stylesheet" />-->
+    	<link href="../css/common.css" rel="stylesheet" />
+		<script type="text/javascript" src="../js/common.js"></script>
+		<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+		<script type="text/javascript" src="../js/md5.min.js"></script>
+		<script type="text/javascript" src="../js/jquery.showLoading.min.js"></script>
+		<script type="text/javascript" src="../js/bizcom.js"></script>
+		<script type="text/javascript">
+var img = null;
+var blist = [];
+			var sp = null;
+			$(document).ready(function(){
+				$.getJSON('../js/system.json',function(data){
+					sp = data;
+				});
+			});
+function scaned(t, r, f){
+	var d = new Date();
+	var h=d.getHours(),m=d.getMinutes(),s=d.getSeconds(),ms=d.getMilliseconds();
+	if(h < 10){ h='0'+h; }
+	if(m < 10){ m='0'+m; }
+	if(s < 10){ s='0'+s; }
+	if(ms < 10){ ms='00'+ms; }
+	else if(ms < 100){ ms='0'+ms; }
+	var ts = '['+h+':'+m+':'+s+'.'+ms+']';
+	var li=null,hl = document.getElementById('history');
+	if(blist.length > 0){
+		li = document.createElement('li');
+		li.className = 'ditem';
+		hl.insertBefore(li, hl.childNodes[0]);
+	} else{
+		li = document.getElementById('nohistory');
+	}
+	li.id = blist.length;
+	var html = '<div class="row"><div class="col-xs-9" onclick="selected(' + li.id + ')"><div>';
+	html += '['+h+':'+m+':'+s +']'+'　　'+t+'码';
+	html += '</div><div>';
+	html += r;
+	html += '</div></div><div class="col-xs-3">';
+	html += '<button type="button" class="mui-btn mui-btn-danger" onclick="delected(' + li.id + ')">删除</button></div></div>';
+	li.innerHTML = html;
+	li.removeAttribute('onclick');
+	blist[blist.length] = {type:t,result:r,file:f};
+	update(t, r, f);
+}
+function selected(id){
+	var h = blist[id];
+	update( h.type, h.result, h.file );
+	if(h.result.indexOf('http://')==0  || h.result.indexOf('https://')==0){
+		plus.nativeUI.confirm(h.result, function(i){
+			if(i.index == 0){
+				plus.runtime.openURL(h.result);
+			}
+		}, '', ['打开', '取消']);
+	} else{
+		plus.nativeUI.alert(h.result);
+	}
+}
+function delected(id){
+	var h = blist[id];
+	plus.nativeUI.confirm('确定要删除' + h.result + '吗？',
+	function(event){
+		if(event.index === 0){
+			$('#' + id).hide();
+			blist[id] = {type:'',result:'',file:''};
+		}
+	});
+}
+
+function update(t, r, f){
+	outSet('扫描成功：');
+	outLine(t);
+	outLine(r);
+	outLine('\n图片地址：'+f);
+	if(!f || f=='null'){
+		img.src = '../img/barcode.png';	
+	} else{
+		plus.io.resolveLocalFileSystemURL(f, function(entry){
+			img.src=entry.toLocalURL();
+		});
+		//img.src = 'http://localhost:13131/'+f;
+	}
+}
+function onempty(){
+	if(window.plus){
+		plus.nativeUI.alert('无扫描记录');
+	} else {
+		alert('无扫描记录');
+	}
+}
+function cleanHistroy(){
+	if(blist.length > 0){
+		var hl = document.getElementById('history');
+		hl.innerHTML = '<li id="nohistory" class="ditem" onclick="onempty();">无历史记录	</li>';
+	}
+	plus.io.resolveLocalFileSystemURL('_doc/barcode/', function(entry){
+		entry.removeRecursively(function(){
+			// Success
+		}, function(e){
+			//alert( "failed"+e.message );
+		});
+	});
+}
+function doUpload(){
+	/*console.log('===upload start===');
+	$.each(blist, function(index, val){
+		console.log(val.type + '，' +val.result + ',' + val.file);
+	});*/
+	var reqData = new Object();
+    reqData.shopId = sp.shopId;
+    reqData.type = '2';
+    reqData.reason = '批量出库';
+    if($('#txtReason').val() !== ''){
+    	reqData.reason = $('#txtReason').val();
+    }
+    reqData.barCodeItemLst = blist;
+    //console.log('CHUKU');
+    //console.log(JSON.stringify(reqData));
+	doAjax({
+            url : 'http://104.199.178.242/rest/shop/upload_invoice',
+            type : 'POST',
+            dataType : "json",
+            data : JSON.stringify(reqData),
+            onSuccess : function(json) {
+                plus.nativeUI.alert(json.optStr);
+                cleanHistroy();
+                blist = [];
+            }
+        });
+};
+		</script>
+		<link rel="stylesheet" href="../css/common.css" type="text/css" charset="utf-8"/>
+		<style type="text/css" media="screen">
+			.hdata {
+				color: #e1673e;	
+				font-size: 14px;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+			.col-xs-9 {
+				width: 70%;
+				float: left;
+				position: relative;
+				min-height: 1px;
+				/*padding-right: 15px;
+				padding-left: 15px;*/
+			}
+			.col-xs-3 {
+				width: 20%;
+				float: right;
+				position: relative;
+				min-height: 1px;
+				/*padding-right: 5px;*/
+				padding-left: 15px;
+			}
+			.mui-btn, button, input[type=button], input[type=reset], input[type=submit] {
+				position: relative;
+    			display: inline-block;
+    			padding: 6px 12px;
+    			margin-bottom: 0;
+    			font-size: 14px;
+    			font-weight: 400;
+    			line-height: 1.42;
+    			color: #333;
+    			text-align: center;
+			    white-space: nowrap;
+			    vertical-align: top;
+			    cursor: pointer;
+			    background-color: #fff;
+			    background-clip: padding-box;
+			    border: 1px solid #ccc;
+			    border-radius: 3px;
+			    border-top-left-radius: 3px;
+			    border-top-right-radius: 3px;
+			    border-bottom-right-radius: 3px;
+			    border-bottom-left-radius: 3px;
+			    -webkit-transition: all;
+			    transition: all;
+			    -webkit-transition-timing-function: linear;
+			    transition-timing-function: linear;
+			    -webkit-transition-duration: .2s;
+			    transition-duration: .2s;
+			}
+			.mui-btn-danger {
+				color: #fff;
+				background-color: #dd524d;
+				border: 1px solid #dd524d;
+			}
+			.tx {
+				   	height:  30px;
+    				font-size: 18px;
+    				font-weight: normal;
+    				width: 88%;
+				    /*padding: 0.3em 0.5em;*/
+				    margin: 0.5em;
+			}
+		</style>
+	</head>
+	<body onload="img=document.getElementById('bimg')">
+		<header id="header">
+			<div class="nvbt iback" onclick="back()"></div>
+			<div class="nvtt">出库扫描</div>
+			<!--<div class="nvbt idoc" onclick="openDoc('Barcode Document','/doc/barcode.html')"></div>-->
+		</header>
+		<div id="dcontent" class="dcontent";>
+			<br/>
+			<img style="width:40%" id="bimg" src="../img/barcode.png"/>
+			<br/>
+			<div class="button" onclick="clicked('barcode_scan.html',true,true)">扫一扫</div>
+			<div class="button" onclick="doUpload()">上传出库数据</div>
+			<div>
+				<input type="text" id="txtReason" placeholder="出库事由，购买对象，其他出库理由" class="tx" />
+			</div>
+			<br/>
+			<ul id="history" class="dlist" style="text-align:left;">
+				<li id="nohistory" class="ditem" onclick="onempty()">无历史记录 </li>
+			</ul>
+			<br/>
+			<div class="button button-waring" onclick="cleanHistroy()">清空历史记录</div>
+		</div>
+		<div id="output">
+Barcode提供二维码扫描识别功能，支持调用摄像头即时扫描二维码，也可直接输入图片进行扫描识别。
+		</div>
+	</body>
+	<script type="text/javascript" src="../js/immersed.js" ></script>
+</html>
