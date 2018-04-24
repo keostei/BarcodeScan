@@ -5,9 +5,9 @@
 		<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 		<meta name="HandheldFriendly" content="true"/>
 		<meta name="MobileOptimized" content="320"/>
-		<title>入库扫描</title>
+		<title>直接出库</title>
+		<link href="../css/showLoading.css" rel="stylesheet" />
     	<link href="../css/common.css" rel="stylesheet" />
-    	<link href="../css/showLoading.css" rel="stylesheet" />
 		<script type="text/javascript" src="../js/common.js"></script>
 		<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
 		<script type="text/javascript" src="../js/md5.min.js"></script>
@@ -19,7 +19,11 @@
 				doScaned(t, r, f);
 			}
 			function doUpload(){
-				uploadInvoice('1','批量入库');
+				var reasonTxt = '直接出库';
+				if($('#txtReason').val() !== ''){
+					reasonTxt = $('#txtReason').val();
+				}
+				uploadInvoice('3',reasonTxt);
 			}
 		</script>
 		<link rel="stylesheet" href="../css/common.css" type="text/css" charset="utf-8"/>
@@ -28,7 +32,7 @@
 	<body onload="img=document.getElementById('bimg')">
 		<header id="header">
 			<div class="nvbt iback" onclick="back()"></div>
-			<div class="nvtt">入库扫描</div>
+			<div class="nvtt">直接出库扫描</div>
 			<!--<div class="nvbt idoc" onclick="openDoc('Barcode Document','/doc/barcode.html')"></div>-->
 		</header>
 		<div id="dcontent" class="dcontent";>
@@ -36,7 +40,10 @@
 			<img style="width:40%" id="bimg" src="../img/barcode.png"/>
 			<br/>
 			<div class="button" onclick="clicked('barcode_scan.html',true,true)">扫一扫</div>
-			<div class="button" onclick="doUpload()">上传数据</div>
+			<div class="button" onclick="doUpload()">上传出库数据</div>
+			<div>
+				<input type="text" id="txtReason" placeholder="出库事由，购买对象，其他出库理由" class="tx" />
+			</div>
 			<br/>
 			<div id="history" >
 				<div class="row div-list">无历史记录</div>

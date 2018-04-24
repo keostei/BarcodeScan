@@ -34,7 +34,7 @@ function createEmbed(){
 		topoffset=(Math.round(plus.navigator.getStatusbarHeight())+45)+'px';
 	}
 	plus.nativeUI.showWaiting('',{style:'black',modal:false,background:'rgba(0,0,0,0)'});
-	embed=plus.webview.create(sp.serviceBaseUrl + '/shop/item_list?shopId=' + sp.shopId,'embed',{top:topoffset,bottom:'0px',position:'dock',dock:'bottom',bounce:'vertical'});
+	embed=plus.webview.create(sp.serviceBaseUrl + '/shop/item_sum?shopId=' + sp.shopId,'embed',{top:topoffset,bottom:'0px',position:'dock',dock:'bottom',bounce:'vertical'});
 	ws.append(embed);
 	embed.addEventListener('loaded',function(){
 		plus.nativeUI.closeWaiting();
@@ -80,7 +80,7 @@ function onBrowserLoading(){
 	<body>
 		<header id="header">
 			<div class="nvbt iback" onclick="back(),plus.nativeUI.closeWaiting();"></div>
-			<div class="nvtt">库存汇总
+			<div class="nvtt">销售报表
 				<!--<form action="?" method="get" onsubmit="openUrl();return false;">
 				<input id="url" type="url" value="http://104.199.178.242/login"/>
 				</form>-->
